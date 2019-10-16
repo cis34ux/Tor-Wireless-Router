@@ -1,4 +1,4 @@
-# Tor-Wireless-Router
+# Tor Wireless Router With RaspberryPi 3
 Bash script to automate the creation of a Tor WiFi access point.
 
 ## Install
