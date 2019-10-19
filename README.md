@@ -12,3 +12,9 @@ sudo ./install.sh
 chmod +x run.sh
 sudo ./run.sh
 ```
+
+## Stop
+```
+chmod +x stop.sh
+sudo ./stop.sh
+```
