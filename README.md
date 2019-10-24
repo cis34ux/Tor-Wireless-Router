@@ -18,3 +18,4 @@ sudo ./run.sh
 chmod +x stop.sh
 sudo ./stop.sh
 ```
+The information contained is for general information purposes only.
