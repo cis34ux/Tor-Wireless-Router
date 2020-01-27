@@ -7,10 +7,10 @@ chmod +x install.sh
 sudo ./install.sh
 ```
 
-## Run
+## Start
 ```
-chmod +x run.sh
-sudo ./run.sh
+chmod +x start.sh
+sudo ./start.sh
 ```
 
 ## Stop
