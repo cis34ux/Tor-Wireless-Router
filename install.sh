@@ -27,7 +27,7 @@ fi
 
 if [ ${#appass} -lt 8 ]
 then
-appass="Tor2019!"
+appass="Tor2020!"
 echo "[*] Your router password is : " $appass
 fi
 
