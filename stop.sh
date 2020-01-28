@@ -1,18 +1,14 @@
-if [ $? != 0 ] 
-then
-  echo "This program must be run as root. run again as root"
-  exit 1
-fi
+echo "Commands will be run as root"
 
 echo "[*] Stopping Tor  ..."
-systemctl stop tor
+sudo systemctl stop tor
 
 # iptables rules
 # Clean iptables rules
-iptables -F
-iptables -t nat -F
+sudo iptables -F
+sudo iptables -t nat -F
 # Give internet access to connected host
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 echo "[OK] Done ..."
 

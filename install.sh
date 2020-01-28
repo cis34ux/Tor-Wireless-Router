@@ -1,23 +1,19 @@
-if [ $? != 0 ] 
-then
-  echo "This program must be run as root. run again as root"
-  exit 1
-fi
+echo "Commands will be run as root"
 
 read -p "[?] Do you want update your system (yY/N)?" ans
 
 if [ $ans = "y" ] || [ $ans = "Y" ]
 then
   echo "[*] Updating ..."
-  apt-get update -y && apt-get -y upgrade
+  sudo apt-get update -y && sudo apt-get -y upgrade
 fi
 
 echo "[*] Downloading and installing necessary packages ..."
-apt install -y hostapd dnsmasq tor 
+sudo apt install -y hostapd dnsmasq tor 
 if [ ! -f /etc/tor/torrc ]
         then
-                apt-get update --fix-missing
-                apt-get install -y hostapd dnsmasq tor 
+                sudo apt-get update --fix-missing
+                sudo apt-get install -y hostapd dnsmasq tor 
 fi
 
 echo "[*] Configuration start..."
@@ -54,80 +50,80 @@ wpa_passphrase=$appass
 
 EOF
 
-systemctl stop hostapd
-systemctl stop dnsmasq
-systemctl stop tor
+sudo systemctl stop hostapd
+sudo systemctl stop dnsmasq
+sudo systemctl stop tor
 
-mv hostapd.conf /etc/hostapd/hostapd.conf
+sudo mv hostapd.conf /etc/hostapd/hostapd.conf
 repl2="DAEMON_CONF\=\"\/etc\/hostapd\/hostapd\.conf\""
-sed -i "/#DAEMON_CONF=\"\"/ s/#DAEMON_CONF=\"\"/$repl2/" /etc/default/hostapd 
+sudo sed -i "/#DAEMON_CONF=\"\"/ s/#DAEMON_CONF=\"\"/$repl2/" /etc/default/hostapd 
 repl1="DAEMON_CONF\=\/etc\/hostapd\/hostapd.conf"
-sed -i "/$repl1/! s/DAEMON_CONF=/$repl1/" /etc/init.d/hostapd
+sudo sed -i "/$repl1/! s/DAEMON_CONF=/$repl1/" /etc/init.d/hostapd
 if [ ! -f /etc/dhcpcd.conf.oldtc ]
         then
-        mv /etc/dhcpcd.conf /etc/dhcpcd.conf.oldtc
+        sudo mv /etc/dhcpcd.conf /etc/dhcpcd.conf.oldtc
         else
-        rm /etc/dhcpcd.conf
+        sudo rm /etc/dhcpcd.conf
 fi
 
-cp config/dhcpcd.conf /etc/
-systemctl restart dhcpcd
+sudo cp config/dhcpcd.conf /etc/
+sudo systemctl restart dhcpcd
 if [ ! -f /etc/dnsmasq.conf.oldtc ]
         then
-        mv /etc/dnsmasq.conf /etc/dnsmasq.conf.oldtc
+        sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.oldtc
         else
-        rm /etc/dnsmasq.conf
+        sudo rm /etc/dnsmasq.conf
 fi
 
-cp config/dnsmasq.conf /etc/dnsmasq.conf
+sudo cp config/dnsmasq.conf /etc/dnsmasq.conf
 if [ ! -f /etc/sysctl.conf.oldtc ]
         then
-        cp /etc/sysctl.conf /etc/sysctl.conf.oldtc
+        sudo cp /etc/sysctl.conf /etc/sysctl.conf.oldtc
 fi
 
 repl3="net\.ipv4\.ip_forward=1"
-sed -i "/#$repl3/ s/#$repl3/$repl3/" /etc/sysctl.conf
+sudo sed -i "/#$repl3/ s/#$repl3/$repl3/" /etc/sysctl.conf
 repl="iptables-restore \< \/etc\/iptables\.ipv4\.nat"
-sed -i "20 s/exit 0/$repl\nexit 0/" /etc/rc.local
+sudo sed -i "20 s/exit 0/$repl\nexit 0/" /etc/rc.local
 if [ ! -f /etc/tor/torrc.oldtc ]
         then
-        mv /etc/tor/torrc /etc/tor/torrc.oldtc
+        sudo mv /etc/tor/torrc /etc/tor/torrc.oldtc
         else
-        rm /etc/tor/torrc
+        sudo rm /etc/tor/torrc
 fi
 
 cat /etc/tor/torrc.oldtc config/torrc.conf >> torrc
-mv torrc /etc/tor/torrc
-sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+sudo mv torrc /etc/tor/torrc
+sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
 
 # iptables rules
 # Give internet access to connected host
-iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 # Clean iptables rules
-iptables -F
-iptables -t nat -F
+sudo iptables -F
+sudo iptables -t nat -F
 # Route all trafic through Tor
-iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 22 -j REDIRECT --to-ports 22
-iptables -t nat -A PREROUTING -i wlan0 -p udp --dport 53 -j REDIRECT --to-ports 53
-iptables -t nat -A PREROUTING -i wlan0 -p tcp --syn -j REDIRECT --to-ports 9040
+sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --dport 2022 -j REDIRECT --to-ports 2022
+sudo iptables -t nat -A PREROUTING -i wlan0 -p udp --dport 53 -j REDIRECT --to-ports 53
+sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp --syn -j REDIRECT --to-ports 9040
 # Save iptables rules
-sh -c "iptables-save > /etc/iptables.ipv4.nat"
+sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
 
 # Create a log file
-touch /var/log/tor/notices.log
-chown debian-tor /var/log/tor/notices.log
-chmod 644 /var/log/tor/notices.log
+sudo touch /var/log/tor/notices.log
+sudo chown debian-tor /var/log/tor/notices.log
+sudo chmod 644 /var/log/tor/notices.log
 
 # Start the services
-systemctl start hostapd
-systemctl start dnsmasq
-systemctl start tor
+sudo systemctl start hostapd
+sudo systemctl start dnsmasq
+sudo systemctl start tor
 
 # Add services to startup
-systemctl enable hostapd
-systemctl enable dnsmasq
-systemctl enable tor
+sudo systemctl enable hostapd
+sudo systemctl enable dnsmasq
+sudo systemctl enable tor
 
 read -p "[?] Press [Enter] to reboot or terminate otherwise press (ctrl+c) ..." chk
-reboot
+sudo reboot
 
